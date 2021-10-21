@@ -1,9 +1,10 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import 'source-map-support/register'
+
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors } from 'middy/middlewares'
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-import { TodosAccess } from '../../helpers/todosAccess'
+import { createTodo } from '../../helpers/businessLogic'
 import { createLogger } from '../../utils/logger'
 import { getUserId } from '../utils'
 
@@ -15,7 +16,7 @@ export const handler = middy(
     // TODO: Implement creating a new TODO item
 
     const userId = getUserId(event)
-    const todo = await new TodosAccess().createTodo(newTodo, userId)
+    const todo = await createTodo(newTodo, userId)
 
     logger.info(`Created todo item for User: ${userId} with data: ${newTodo}`)
 

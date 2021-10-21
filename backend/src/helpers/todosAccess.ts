@@ -1,13 +1,12 @@
-import { TodoItem } from "../models/TodoItem";
-import { CreateTodoRequest } from "../requests/CreateTodoRequest";
-import { UpdateTodoRequest } from "../requests/UpdateTodoRequest";
-const uuid = require('uuid/v4')
+import { TodoItem } from "../models/TodoItem"
+import { UpdateTodoRequest } from "../requests/UpdateTodoRequest"
+
 import * as AWS from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-export class TodosAccess {
+export default class TodosAccess {
     constructor(
         private readonly docClient: AWS.DynamoDB.DocumentClient = createDynamoDBClient(),
         private readonly todosTable = process.env.TODOS_TABLE,
@@ -27,16 +26,7 @@ export class TodosAccess {
         return result.Items as TodoItem[]
     }
 
-    async createTodo(request: CreateTodoRequest, userId: string): Promise<TodoItem> {
-        const newId = uuid()
-        const item = new TodoItem()
-        item.userId = userId
-        item.todoId = newId
-        item.createdAt = new Date().toISOString()
-        item.name = request.name
-        item.dueDate = request.dueDate
-        item.done = false
-
+    async createTodo(item: TodoItem): Promise<TodoItem> {
         await this.docClient.put({
             TableName: this.todosTable,
             Item: item
@@ -57,7 +47,7 @@ export class TodosAccess {
         return result.Item as TodoItem
     }
 
-    async updateTodo(updatedTodo: UpdateTodoRequest, todoId: string, userId: string) {
+    async updateTodoById(updatedTodo: UpdateTodoRequest, todoId: string, userId: string) {
         await this.docClient.update({
             TableName: this.todosTable,
             Key: {

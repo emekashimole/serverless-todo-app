@@ -3,13 +3,11 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
-
+import { getTodoById, updateTodoById } from '../../helpers/businessLogic'
 import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import { getUserId } from '../utils'
-import { TodosAccess } from '../../helpers/todosAccess'
 import { createLogger } from '../../utils/logger'
 
-const todosAccess = new TodosAccess()
 const logger = createLogger('todos')
 
 export const handler = middy(
@@ -30,7 +28,7 @@ export const handler = middy(
 
     const userId = getUserId(event)
 
-    const item = await todosAccess.getTodoById(todoId, userId)
+    const item = await getTodoById(todoId, userId)
     if (!item) {
       logger.error(`Todo item with id: ${todoId} not found`)
       return {
@@ -51,7 +49,7 @@ export const handler = middy(
       }
     }
 
-    await new TodosAccess().updateTodo(updatedTodo, todoId, userId)
+    await updateTodoById(updatedTodo, todoId, userId)
     logger.info(`User ${userId} updated todo item with id: ${todoId} successfully`)
     return {
       statusCode: 200,

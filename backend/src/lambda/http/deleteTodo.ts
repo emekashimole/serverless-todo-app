@@ -3,12 +3,11 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
-import { TodosAccess } from '../../helpers/todosAccess'
+import { getTodoById, deleteTodoById } from '../../helpers/businessLogic'
 import { createLogger } from '../../utils/logger'
 import { getUserId } from '../utils'
 
 const logger = createLogger('todos')
-const todosAccess = new TodosAccess()
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -27,8 +26,7 @@ export const handler = middy(
 
     const userId = getUserId(event)
 
-    const item = await todosAccess.getTodoById(todoId, userId)
-    logger.info('Item: ', item)
+    const item = await getTodoById(todoId, userId)
     if (!item) {
       logger.error(`Todo item with id: ${todoId} not found`)
       return {
@@ -49,7 +47,7 @@ export const handler = middy(
       }
     }
 
-    await todosAccess.deleteTodoById(todoId, userId)
+    await deleteTodoById(todoId, userId)
     logger.info(`User ${userId} deleted todo item with id: ${todoId} successfully`)
     return {
       statusCode: 200,

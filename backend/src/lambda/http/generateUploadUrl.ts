@@ -3,13 +3,11 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import * as middy from 'middy'
 import { cors, httpErrorHandler } from 'middy/middlewares'
-
-import { TodosAccess } from '../../helpers/todosAccess'
+import { getTodoById } from '../../helpers/businessLogic'
 import { getUserId } from '../utils'
 import { AttachmentUtils } from '../../helpers/attachmentUtils'
 import { createLogger } from '../../utils/logger'
 
-const todosAccess = new TodosAccess()
 const attachmentUtils = new AttachmentUtils()
 const logger = createLogger('todos')
 
@@ -30,7 +28,7 @@ export const handler = middy(
 
     const userId = getUserId(event)
 
-    const item = await todosAccess.getTodoById(todoId, userId)
+    const item = await getTodoById(todoId, userId)
     if (!item) {
       logger.error(`Todo item with id: ${todoId} not found`)
       return {
